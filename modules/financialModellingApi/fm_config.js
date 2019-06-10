@@ -52,9 +52,7 @@ module.exports = {
 
     // if timenow is between nyse open hours
     if (nytime_hours >= this.constants.NYSE_open_hours &&
-      nytime_minutes >= this.constants.NYSE_open_minutes &&
-      nytime_hours <= this.constants.NYSE_close_hours &&
-      nytime_minutes <= this.constants.NYSE_close_minutes) {
+      nytime_hours <= this.constants.NYSE_close_hours) {
 
       // fetching and returning status
       let response = await fetch(this.apiURLs["NYSE Hours"]);
