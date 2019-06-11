@@ -31,6 +31,13 @@ let userSchema = new mongoose.Schema({
   }
 });
 
+// specifying user fields to be returned upon any query
+userSchema.methods.toJSON = function () {
+  let user = this;
+  let userObject = user.toObject();
+  return {username: userObject.username, email: userObject.email, password: userObject.password};
+}
+
 // Declaring model and instance methods //
 // generating auth token
 userSchema.methods.generateAuthToken = function () {
@@ -53,7 +60,7 @@ userSchema.statics.findByToken = function (token) {
     return Promise.reject();
   }
 
-  return User.findOne({_id: decoded._id});
+  return User.findOne({ _id: decoded._id });
 }
 
 // requiring model
