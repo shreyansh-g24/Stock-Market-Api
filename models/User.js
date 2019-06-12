@@ -35,7 +35,7 @@ let userSchema = new mongoose.Schema({
 userSchema.methods.toJSON = function () {
   let user = this;
   let userObject = user.toObject();
-  return {username: userObject.username, email: userObject.email, password: userObject.password};
+  return { username: userObject.username, email: userObject.email };
 }
 
 // Declaring model and instance methods //

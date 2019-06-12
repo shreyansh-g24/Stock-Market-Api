@@ -15,7 +15,7 @@ let {authenticate} = require("./../utils/auth");
  *    => /new : creating new user
  *    => /login : logging in
  */
-router.post('/new', userController.signupUser);
+router.post('/signup', userController.signupUser);
 router.post("/login", userController.login);
 
 // exporting router
