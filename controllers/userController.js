@@ -7,18 +7,49 @@ let User = require("./../models/User");
 module.exports = {
 
   // authenticates jwt
-  authenticateJWT: function(req, res, next){
+  authenticateJWT: function (req, res, next) {
     let token = req.header("x-auth");
 
     User.findByToken(token)
       .then(user => {
-        if(user) req.auth = {success: true, user};
-        else if(!user) req.auth = {success: false, err: "Unable to find a user with a matching ID"};
+        if (user) req.auth = { success: true, user };
+        else if (!user) req.auth = { success: false, err: "Unable to find a user with a matching ID" };
         next();
       })
       .catch(err => {
-        res.json({success:false, err});
+        res.json({ success: false, err });
       });
+  },
+
+  // adds bookmark
+  addBookmark: function (req, res, next) {
+    let bookmark = req.body;
+    let bookmarksArr = null;
+    if (bookmark.bookmarkType === "Crypto-Currency") bookmarksArr = "bookmarks_cc";
+
+    User.findById(req.auth.user._id, (err, user) => {
+      if (err) return next(err);
+      if (!user) return res.status(404).json({ success: false, err: "Unable to update bookmark", bookmark });
+      else if (user) {
+        let bookmarks = null;
+
+        // checking if the bookmark for the target unit already exists
+        if (user[bookmarksArr].filter(b => b.bookmarkType === bookmark.bookmarkType).length !== 0) {
+          bookmarks = user[bookmarksArr].map(b => b.ticker === bookmark.ticker ? bookmark : b);
+        }
+        else {
+          bookmarks = user[bookmarksArr];
+          bookmarks.push(bookmark);
+        }
+
+        // updating the target bookmarks array
+        User.findByIdAndUpdate({ _id: req.auth.user._id }, { [bookmarksArr]: bookmarks }, { new: true }, (err, updatedUser) => {
+          if (err) return next(err);
+          if (!user) return res.status(404).json({ success: false, err: "Unable to update bookmark", bookmark });
+          else if (user) return res.status(200).json({ success: true, bookmark });
+        });
+      }
+    });
   },
 
   // signs up new user

@@ -25,6 +25,15 @@ let userSchema = new mongoose.Schema({
     type: String,
     minlength: 6,
   },
+  bookmarks_cc: [{
+    bookmarkType: {
+      type: String,
+    },
+    ticker: String,
+    url: String,
+    bookmarkedPrice: Number,
+    bookmarkedDate: String,
+  }],
   access: {
     type: String,
     default: "authorized",
@@ -35,7 +44,7 @@ let userSchema = new mongoose.Schema({
 userSchema.methods.toJSON = function () {
   let user = this;
   let userObject = user.toObject();
-  return { username: userObject.username, email: userObject.email };
+  return { username: userObject.username, email: userObject.email, bookmarks_cc: userObject.bookmarks_cc};
 }
 
 // Declaring model and instance methods //
