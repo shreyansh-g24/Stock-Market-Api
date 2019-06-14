@@ -15,7 +15,12 @@ module.exports = {
     NYSE_close_minutes: 0,
   },
 
-  // URL's for financial modelling api calls
+  // URL's for financial modelling api calls to fetch data
+  ccApiURLs: {
+    "Crypto-Currencies": "https://financialmodelingprep.com/api/v3/cryptocurrency/{ticker}",
+  },
+
+  // URL's for financial modelling api calls (HOME PAGE)
   apiURLs: {
 
     // is the market open, holidays, exchange's name, working hours
