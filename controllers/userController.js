@@ -9,6 +9,7 @@ module.exports = {
   // authenticates jwt
   authenticateJWT: function(req, res, next){
     let token = req.header("x-auth");
+
     User.findByToken(token)
       .then(user => {
         if(user) req.auth = {success: true, user};
@@ -16,7 +17,6 @@ module.exports = {
         next();
       })
       .catch(err => {
-        console.log(err);
         res.json({success:false, err});
       });
   },
