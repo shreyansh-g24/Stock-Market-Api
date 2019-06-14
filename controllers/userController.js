@@ -6,7 +6,22 @@ let User = require("./../models/User");
 // exporting functions
 module.exports = {
 
-  // signing up new user
+  // authenticates jwt
+  authenticateJWT: function(req, res, next){
+    let token = req.header("x-auth");
+    User.findByToken(token)
+      .then(user => {
+        if(user) req.auth = {success: true, user};
+        else if(!user) req.auth = {success: false, err: "Unable to find a user with a matching ID"};
+        next();
+      })
+      .catch(err => {
+        console.log(err);
+        res.json({success:false, err});
+      });
+  },
+
+  // signs up new user
   signupUser: function (req, res, next) {
     let userInfo = req.body;
     // checking if email is already registered
@@ -27,7 +42,7 @@ module.exports = {
     });
   },
 
-  // logging in
+  // logs user in
   login: function (req, res, next) {
     let userLogin = req.body;
     User.find({ username: userLogin.username }, (err, user) => {
