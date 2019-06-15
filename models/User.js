@@ -7,6 +7,16 @@ let jwt = require("jsonwebtoken");
 // Importing config file
 const config = require("./../config/config");
 
+/* 
+    bookmarkType: {
+      type: String,
+    },
+    ticker: String,
+    url: String,
+    bookmarkedPrice: Number,
+    bookmarkedDate: String,
+*/
+
 // Defining user schema
 let userSchema = new mongoose.Schema({
 

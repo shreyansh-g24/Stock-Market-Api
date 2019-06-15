@@ -21,9 +21,56 @@ module.exports = {
       });
   },
 
-  // adds bookmark
+  // checks bookmark for update: whether it's to be removed or added/updated
+  parseBookmark: (req, res, next) => {
+
+    // extracting bookmark
+    let bookmark = req.body.data.bookmark;
+
+    // parses bookmark data
+    req.body.data.bookmark = {
+      bookmarkType: bookmark.bookmarkType,
+      ticker: bookmark.ticker.toUpperCase(),
+      url: bookmark.url,
+      bookmarkedPrice: Number(bookmark.bookmarkedPrice),
+      bookmarkedDate: bookmark.bookmarkedDate,
+    };
+
+    next();
+
+  },
+
+  // removes bookmark
+  removeBookmark: function (req, res, next) {
+    let bookmark = req.body.data.bookmark;
+
+    let bookmarksArr = null;
+    if (bookmark.bookmarkType === "Crypto-Currency") bookmarksArr = "bookmarks_cc";
+
+    // finding the user by id and removing the selected bookmark
+    User.findById(req.auth.user._id, (err, user) => {
+      if(err) return next(err);
+      if(!user) return res.status(404).json({success: false, err: "Unable to find user and delete the selected bookmark"});
+      else if(user) {
+        let targetBookmark = user[bookmarksArr].filter(b => b.ticker === bookmark.ticker);
+        if(targetBookmark.length === 0) return res.json({success: false, err: "Unable to the find the bookmark to delete!"});
+
+        User.findByIdAndUpdate({ _id: user._id }, { $pull: { [bookmarksArr]: targetBookmark[0] } }, { new: true, useFindAndModify: false }, (err, updatedUser) => {
+
+          if (err) return next(err);
+          if (!updatedUser) return res.status(404).json({ success: false, err: "Unable to delete bookmark", bookmark });
+          else if (updatedUser) return res.status(200).json({ success: true, bookmark });
+        });
+
+      }
+    });
+  },
+
+  // adds bookmark or updates if already existing
   addBookmark: function (req, res, next) {
-    let bookmark = req.body;
+
+    let bookmark = req.body.data.bookmark;
+
     let bookmarksArr = null;
     if (bookmark.bookmarkType === "Crypto-Currency") bookmarksArr = "bookmarks_cc";
 
@@ -31,23 +78,29 @@ module.exports = {
       if (err) return next(err);
       if (!user) return res.status(404).json({ success: false, err: "Unable to update bookmark", bookmark });
       else if (user) {
-        let bookmarks = null;
 
         // checking if the bookmark for the target unit already exists
-        if (user[bookmarksArr].filter(b => b.bookmarkType === bookmark.bookmarkType).length !== 0) {
-          bookmarks = user[bookmarksArr].map(b => b.ticker === bookmark.ticker ? bookmark : b);
-        }
-        else {
-          bookmarks = user[bookmarksArr];
-          bookmarks.push(bookmark);
+        if (user[bookmarksArr].filter(b => b.ticker === bookmark.ticker).length !== 0) {
+
+          // updates the selected unit 
+          User.update({ _id: req.auth.user._id, [bookmarksArr + ".ticker"]: bookmark.ticker }, { $set: { [bookmarksArr + ".$"]: bookmark } }, { new: true, useFindAndModify: false }, (err, status) => {
+
+            if (err) return next(err);
+            if (!status.ok) return res.status(404).json({ success: false, err: "Unable to update bookmark", bookmark });
+            else if (status.ok) return res.status(200).json({ success: true, bookmark });
+          });
         }
 
-        // updating the target bookmarks array
-        User.findByIdAndUpdate({ _id: req.auth.user._id }, { [bookmarksArr]: bookmarks }, { new: true }, (err, updatedUser) => {
-          if (err) return next(err);
-          if (!user) return res.status(404).json({ success: false, err: "Unable to update bookmark", bookmark });
-          else if (user) return res.status(200).json({ success: true, bookmark });
-        });
+        else {
+          // updating the target bookmarks array: adds a new bookmark
+          User.findByIdAndUpdate({ _id: req.auth.user._id }, { $push: { [bookmarksArr]: bookmark } }, { new: true, useFindAndModify: false }, (err, updatedUser) => {
+            if (err) return next(err);
+            if (!updatedUser) return res.status(404).json({ success: false, err: "Unable to update bookmark", bookmark });
+            else if (updatedUser) return res.status(200).json({ success: true, bookmark });
+          });
+
+        }
+
       }
     });
   },
