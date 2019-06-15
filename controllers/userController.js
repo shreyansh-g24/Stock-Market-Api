@@ -49,11 +49,11 @@ module.exports = {
 
     // finding the user by id and removing the selected bookmark
     User.findById(req.auth.user._id, (err, user) => {
-      if(err) return next(err);
-      if(!user) return res.status(404).json({success: false, err: "Unable to find user and delete the selected bookmark"});
-      else if(user) {
+      if (err) return next(err);
+      if (!user) return res.status(404).json({ success: false, err: "Unable to find user and delete the selected bookmark" });
+      else if (user) {
         let targetBookmark = user[bookmarksArr].filter(b => b.ticker === bookmark.ticker);
-        if(targetBookmark.length === 0) return res.json({success: false, err: "Unable to the find the bookmark to delete!"});
+        if (targetBookmark.length === 0) return res.json({ success: false, err: "Unable to the find the bookmark to delete!" });
 
         User.findByIdAndUpdate({ _id: user._id }, { $pull: { [bookmarksArr]: targetBookmark[0] } }, { new: true, useFindAndModify: false }, (err, updatedUser) => {
 
@@ -64,6 +64,17 @@ module.exports = {
 
       }
     });
+  },
+
+  // returns bookmarks
+  returnBookmarks: function (req, res, next) {
+
+    User.findById(req.auth.user._id, (err, user) => {
+      if(err) return next(err);
+      if(!user) return res.status(404).json({success: false, err: "Unable to find the user!"});
+      else if(user) return res.status(200).json({success: true, bookmarks_cc: user.bookmarks_cc});
+    });
+
   },
 
   // adds bookmark or updates if already existing
