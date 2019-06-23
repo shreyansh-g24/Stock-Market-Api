@@ -13,7 +13,7 @@ module.exports = {
     User.findByToken(token)
       .then(user => {
         if (user) req.auth = { success: true, user };
-        else if (!user) req.auth = { success: false, err: "Unable to find a user with a matching ID" };
+        else if (!user) return res.status(404).json({ success: false, err: "Unable to find a user with a matching ID" });
         next();
       })
       .catch(err => {
@@ -70,9 +70,9 @@ module.exports = {
   returnBookmarks: function (req, res, next) {
 
     User.findById(req.auth.user._id, (err, user) => {
-      if(err) return next(err);
-      if(!user) return res.status(404).json({success: false, err: "Unable to find the user!"});
-      else if(user) return res.status(200).json({success: true, bookmarks_cc: user.bookmarks_cc});
+      if (err) return next(err);
+      if (!user) return res.status(404).json({ success: false, err: "Unable to find the user!" });
+      else if (user) return res.status(200).json({ success: true, bookmarks_cc: user.bookmarks_cc });
     });
 
   },
@@ -152,5 +152,51 @@ module.exports = {
       };
     });
   },
+
+  // updates user password
+  changePassword: function (req, res, next) {
+    // if user not found with a matching id
+    if (!req.auth.success) return res.status(500).json({ success: false, err: "Unexpected Error!" });
+    // if user found
+    else if (req.auth.success) {
+      let { oldPassword, newPassword } = req.body;
+      let { user } = req.auth;
+
+      // if old password is not a match
+      if (oldPassword !== user.password) {
+        return res.status(401).json({ success: false, err: "Password incorrect!" });
+      }
+      // if new password is smaller than minlength (mongo not auto verifying)
+      else if (newPassword.length < 6) {
+        return res.status(400).json({ success: false, err: "Password needs to be atleast 6 characters long!" });
+      }
+      // if old password matches, updating the user
+      else if (oldPassword === user.password) {
+
+        User.findByIdAndUpdate(user._id, { password: newPassword }, { new: true, useFindAndModify: false }, (err, updatedUser) => {
+          if (err) return next(err);
+
+          return res.status(200).json({ success: true, updatedUser });
+        });
+      }
+    }
+  },
+
+  // deletes user
+  deleteUser: function (req, res, next) {
+    if (!req.auth.success) return res.status(500).json({ success: false, err: "Unexpected Error!" });
+    else if (req.auth.success) {
+      let { user } = req.auth;
+      let { password } = req.body;
+
+      if(user.password !== password) return res.status(401).json({success: false, err: "Incorrect Password!"});
+      else if(user.password === password) {
+        User.findByIdAndDelete(user._id, (err, removedUser) => {
+          if(err) return next(err);
+          return res.status(200).json({success: true, user: removedUser});
+        });
+      }
+    }
+  }
 
 };
