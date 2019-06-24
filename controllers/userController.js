@@ -159,16 +159,17 @@ module.exports = {
     if (!req.auth.success) return res.status(500).json({ success: false, err: "Unexpected Error!" });
     // if user found
     else if (req.auth.success) {
-      let { oldPassword, newPassword } = req.body;
+
+      let { oldPassword, newPassword } = req.body.data;
       let { user } = req.auth;
 
       // if old password is not a match
       if (oldPassword !== user.password) {
-        return res.status(401).json({ success: false, err: "Password incorrect!" });
+        return res.json({ success: false, err: "Password incorrect!" });
       }
       // if new password is smaller than minlength (mongo not auto verifying)
       else if (newPassword.length < 6) {
-        return res.status(400).json({ success: false, err: "Password needs to be atleast 6 characters long!" });
+        return res.json({ success: false, err: "Password needs to be atleast 6 characters long!" });
       }
       // if old password matches, updating the user
       else if (oldPassword === user.password) {
@@ -187,9 +188,9 @@ module.exports = {
     if (!req.auth.success) return res.status(500).json({ success: false, err: "Unexpected Error!" });
     else if (req.auth.success) {
       let { user } = req.auth;
-      let { password } = req.body;
+      let { password } = req.body.data;
 
-      if(user.password !== password) return res.status(401).json({success: false, err: "Incorrect Password!"});
+      if(user.password !== password) return res.json({success: false, err: "Incorrect Password!"});
       else if(user.password === password) {
         User.findByIdAndDelete(user._id, (err, removedUser) => {
           if(err) return next(err);

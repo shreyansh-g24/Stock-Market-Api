@@ -7,7 +7,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 let mongoose = require("mongoose");
-let cronInit = require("./modules/cron/cronFetch_Init");
+// let cronInit = require("./modules/cron/cronFetch_Init");
 
 // Importing routers
 var indexRouter = require('./routes/index');
@@ -23,7 +23,7 @@ mongoose.connect("mongodb://localhost/test_stockMarketApi", { useNewUrlParser: t
 });
 
 // Initialising cron
-cronInit();
+// cronInit();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

@@ -106,7 +106,7 @@ let task_fetchData = (function () {
 // UPDATE taskTime here to change the frequency of checking if the market is open.
 let cronInit = function () {
   // Declaring time variables
-  let taskTime = "*/6 * * * * *";
+  let taskTime = "* * * * *";
 
   // Creating cron task
   let task = cron.schedule(taskTime, () => {
