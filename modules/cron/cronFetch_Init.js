@@ -72,10 +72,17 @@ function fetchData(apiUrls = null) {
 
     fetch(apiUrls[key])
       .then(response => response.json())
-      .then(data => _gDataStore[key] = data)
+      .then(data => {
+        _gDataStore[key] = data;
+        console.log("=======================================================================");
+        console.log("LOG 1.1: cronfetch-fetchData-Data\n", JSON.stringify(data, null, 2));
+        console.log("=======================================================================");
+        console.log("LOG 1.2: cronfetch-fetchData-_gDataStore\n", JSON.stringify(_gDataStore[key], null, 2));
+        console.log("=======================================================================");        
+      })
       .catch(err => {
 
-        _gDataStore[key] = { errMessage: "Unable to fetch data!", err };
+        _gDataStore[key] = { errMessage: "cronfetch_init: fetchData: Unable to fetch data!", err };
 
       });
   }
@@ -99,7 +106,7 @@ let task_fetchData = (function () {
 // UPDATE taskTime here to change the frequency of checking if the market is open.
 let cronInit = function () {
   // Declaring time variables
-  let taskTime = "* * * * *";
+  let taskTime = "*/6 * * * * *";
 
   // Creating cron task
   let task = cron.schedule(taskTime, () => {
