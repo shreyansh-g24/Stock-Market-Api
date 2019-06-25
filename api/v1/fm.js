@@ -20,6 +20,5 @@ router.get("/home", fmCont.returnHomeData);
 router.get("/nyse", fmCont.returnNYSEData);
 router.get("/cc", userCont.authenticateJWT, fmCont.returnCCURL);
 
-
 // Exporting router
 module.exports = router;

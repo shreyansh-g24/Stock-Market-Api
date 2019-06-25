@@ -14,6 +14,7 @@ let { authenticate } = require("./../utils/auth");
  *  => /users
  *    => /new : creating new user
  *    => /login : logging in
+ *    => /auth : authenticates use logged in and returns the status
  *    => /bookmarks/update : adds/updates/removes bookmark
  *    => /bookmarks : returns all bookmarks of the user
  *    => /update/password : updates password
@@ -21,6 +22,7 @@ let { authenticate } = require("./../utils/auth");
  */
 router.post('/signup', userController.signupUser);
 router.post("/login", userController.login);
+router.get("/auth", userController.authenticateJWT, userController.returnAuthenticationStatus);
 router.post("/update/password", userController.authenticateJWT, userController.changePassword);
 router.post("/delete", userController.authenticateJWT, userController.deleteUser);
 router.post("/bookmarks/update", userController.authenticateJWT, userController.parseBookmark, (req, res, next) => {

@@ -6,6 +6,14 @@ let User = require("./../models/User");
 // exporting functions
 module.exports = {
 
+  // returns authentication status for user logged in
+  returnAuthenticationStatus: function (req, res, next) {
+    let { auth } = req;
+    if(auth.success) return res.status(200).json({success: true, user: auth.user});
+    return res.json({success: false, err: "Unexpected error encountered while trying authenticate the user."})
+  },
+
+
   // authenticates jwt
   authenticateJWT: function (req, res, next) {
     let token = req.header("x-auth");
@@ -190,11 +198,11 @@ module.exports = {
       let { user } = req.auth;
       let { password } = req.body.data;
 
-      if(user.password !== password) return res.json({success: false, err: "Incorrect Password!"});
-      else if(user.password === password) {
+      if (user.password !== password) return res.json({ success: false, err: "Incorrect Password!" });
+      else if (user.password === password) {
         User.findByIdAndDelete(user._id, (err, removedUser) => {
-          if(err) return next(err);
-          return res.status(200).json({success: true, user: removedUser});
+          if (err) return next(err);
+          return res.status(200).json({ success: true, user: removedUser });
         });
       }
     }
